@@ -277,7 +277,7 @@ class Bimbler_Reminders {
 			$organiser = tribe_get_organizer ($post_id);
 				
 			if (!isset ($organiser)) {
-				error_log ('Could not get organiser for event '. $post_id);
+				error_log ('No organiser for event '. $post_id);
 				return null;
 			}
 			
@@ -824,8 +824,8 @@ class Bimbler_Reminders {
 			
 			$notify_users = array ();
 			
-			// Always send mails to Paul (user ID 1).
-			$notify_users[] = 1;
+			// Always send mails to admins. // Paul (user ID 1).
+			$notify_users = array_merge ($notify_users, Bimbler_RSVP::get_instance()->get_admin_users());
 			
 			$users_rsvp = $this->get_rsvpd_users ($post->ID);
 			$users_hosts = $this->get_event_host_users ($post->ID);
@@ -926,8 +926,8 @@ class Bimbler_Reminders {
 			
 		$notify_users = array ();
 			
-		// Always send mails to Paul (user ID 1).
-		$notify_users[] = 1;
+		// Always send mails to admins.
+		$notify_users = array_merge ($notify_users, Bimbler_RSVP::get_instance()->get_admin_users());
 
 		$users_rsvp = array ();
 		$users_rsvp [] = $user_id;
@@ -1119,8 +1119,8 @@ class Bimbler_Reminders {
 			//setup_postdata($post);
 			$notify_users = array ();
 			
-			// Always send mails to Paul (user ID 1).
-			$notify_users[] = 1;
+			// Always send mails to admin team.
+			$notify_users = array_merge ($notify_users, Bimbler_RSVP::get_instance()->get_admin_users());
 
 			// Send to all users if not in test mode.
 			if ('Y' != $a['test']) {
