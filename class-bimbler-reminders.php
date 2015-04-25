@@ -273,28 +273,49 @@ class Bimbler_Reminders {
 			{
 				return null;
 			}
-			
+
+			// Get the Tribe Events Organiser.
 			$organiser = tribe_get_organizer ($post_id);
 				
-			if (!isset ($organiser)) {
-				error_log ('No organiser for event '. $post_id);
-				return null;
-			}
-			
-			$organiser_user = get_user_by ('login', $organiser);
+			if (isset ($organiser)) {
 	
-			if (!isset ($organiser_user)) {
-				error_log ('Could not get user details for user '. $organiser);
-				return null;
+				$organiser_user = get_user_by ('login', $organiser);
+	
+				if (isset ($organiser_user)) {
+
+					$user_list[] = $organiser_user->ID;
+					
+				}
 			}
 			
-			//error_log ('User '. $organiser_user->ID . ' is the organiser for event '. $post_id);
+			// Get the event hosts.
+			$meta_hosts_json = get_post_meta ($post_id, 'bimbler_ride_hosts', true);
+
+			if (isset ($meta_hosts_json)) {
+
+				$meta_hosts = json_decode($meta_hosts_json);
+				
+				if (isset ($meta_hosts)) {
+					
+					foreach ($meta_hosts as $host) {
+						
+						$user_list[] = $host;
+						
+					}
+				}
+			}
+
+			error_log ('Event Hosts:');
 			
-			$user_list[] = $organiser_user->ID;
+			foreach ($user_list as $host) {
+			
+				error_log ('   ' . $host);
+			
+			}
 			
 			return $user_list;
 		}
-		
+				
 		/*
 		 * 
 		 */
