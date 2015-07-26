@@ -791,8 +791,12 @@ class Bimbler_Reminders {
 		$content .= '<p>Remote host: ' . $_SERVER["REMOTE_ADDR"] . '</p>';
 		
 		$host = $_SERVER["REMOTE_ADDR"];
+		$local_ip = getHostByName(getHostName());
 		
-		if ( !current_user_can( 'manage_options' ) && ('103.16.128.51' != $host))  {
+		error_log ('HTTP host: ' . $host . ', Local IP: ' . $local_ip);
+		
+//		if ( !current_user_can( 'manage_options' ) && ('103.16.128.51' != $host))  {
+		if ( !current_user_can( 'manage_options' ) && ($local_ip != $host))  {
 			$content = '<div class="bimbler-alert-box error"><span>Error: </span>You must be an admin user to view this page.</div>';
 			
 			error_log ('send_rsvp_reminders called by non-admin or not from localhost.');
@@ -1075,8 +1079,12 @@ class Bimbler_Reminders {
 	function send_upcoming_reminders($atts) {
 	
 		$host = $_SERVER["REMOTE_ADDR"];
+		$local_ip = getHostByName(getHostName());
 		
-		if ( !current_user_can( 'manage_options' ) && ('103.16.128.51' != $host))  {
+		error_log ('HTTP host: ' . $host . ', Local IP: ' . $local_ip);
+		
+//		if ( !current_user_can( 'manage_options' ) && ('103.16.128.51' != $host))  {
+		if ( !current_user_can( 'manage_options' ) && ($local_ip != $host))  {
 			$content = '<div class="bimbler-alert-box error"><span>Error: </span>You must be an admin user to view this page.</div>';
 			
 			error_log ('send_upcoming_reminders called by non-admin or not from localhost.');
