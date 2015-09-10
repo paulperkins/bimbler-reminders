@@ -830,10 +830,34 @@ class Bimbler_Reminders {
 		$content .= 'Send emails: ' . $a['send_mail'] . '<br>';
 		$content .= 'Test mode: ' . $a['test'] . '<br><br>';
 		
-		$get_posts = tribe_get_events(array('eventDisplay'		=> 'all',
+/*		$get_posts = tribe_get_events(array('eventDisplay'		=> 'all',
 											'start_date' 		=> $date_from,
 											'end_date' 			=> $date_to,
-											'posts_per_page' 	=> -1) ); 
+											'posts_per_page' 	=> -1) ); */  
+		
+		// Show events which have a start date between the from- and to-dates.
+		// Don't show in-flight events which have already started.
+		$get_posts = tribe_get_events( array(
+				'eventDisplay' 	=> 'custom',
+				'posts_per_page'=>	-1,
+				'meta_query' 	=> array(
+						'relation' => 'AND',
+						array(
+								'key' 		=> '_EventStartDate',
+								'value' 	=> $date_from,
+								'compare' 	=> '>=',
+								'type' 		=> 'date'
+						),
+						array(
+								'key' 		=> '_EventStartDate',
+								'value' 	=> $date_to,
+								'compare' 	=> '<',
+								'type' 		=> 'date'
+						),
+						'orderby' 	=> '_EventEndDate',
+						'order'	 	=> 'ASC'
+				)));
+		
 		
 		// Get any up-coming events. Get events from the day after the RSVPd event.
 		$upcoming_events = $this->get_upcoming_events($date_to, null);
