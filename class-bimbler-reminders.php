@@ -749,7 +749,8 @@ class Bimbler_Reminders {
 	 * Comment text
 	 * 
 	 */
-	function build_upcoming_notification_email ($events, $user_to) {
+	//function build_upcoming_notification_email ($events, $user_to) {
+	function build_upcoming_notification_email ($bimbler_events, $mingler_events, $social_events, $user_to) {
 		
 		$slug = $this->slug_upcoming_post; // TODO: Move this into settings.
 	
@@ -765,9 +766,20 @@ class Bimbler_Reminders {
 		// Replace fields.
 		$email_content = str_replace ('[name]', $user_to, $email_content);
 
-		$event_bullets = $this->build_event_bullets($events);
-			
-		$email_content = str_replace ('<p>[upcoming_events_list]</p>', $event_bullets, $email_content);
+		// Bimbles.
+		$event_bullets = $this->build_event_bullets($bimbler_events);
+		$email_content = str_replace ('<p>[upcoming_bimbler_events_list]</p>', $event_bullets, $email_content);
+
+		// Mingles.
+		$event_bullets = $this->build_event_bullets($mingler_events);
+		$email_content = str_replace ('<p>[upcoming_mingler_events_list]</p>', $event_bullets, $email_content);
+
+		// Social.
+		$event_bullets = $this->build_event_bullets($social_events);
+		$email_content = str_replace ('<p>[upcoming_social_events_list]</p>', $event_bullets, $email_content);
+
+		//$event_bullets = $this->build_event_bullets($events);
+		//$email_content = str_replace ('<p>[upcoming_events_list]</p>', $event_bullets, $email_content);
 		
 		$email_content = str_replace ('<p>', $this->p_style, $email_content);
 
@@ -1084,6 +1096,32 @@ class Bimbler_Reminders {
 		
 		return $get_posts;
 	}
+
+	/*
+	 * 
+	 */
+	function get_upcoming_events_by_cat ($date_from, $date_to, $category, $count = 4) {
+		
+/*		$get_posts = tribe_get_events(array('eventDisplay'		=> 'all',
+				'start_date' 		=> $date_from,
+				//'end_date' 			=> $date_to,
+				'posts_per_page' 	=> $count) ); */
+		
+		$get_posts = tribe_get_events(array(
+			'start_date' 		=> $date_from,
+			'posts_per_page' 	=> $count,
+			'eventDisplay' 		=> 'all',
+			'tax_query' 		=> array(
+										array(
+											'taxonomy' => TribeEvents::TAXONOMY,
+														'field' => 'slug',
+														'terms' => $category),
+										)
+										));
+		
+		return $get_posts;
+	}
+	
 	
 	function get_upcoming_events_exclude ($date_from, $exclude, $count = 4) {
 	
@@ -1147,7 +1185,12 @@ class Bimbler_Reminders {
 		$content .= 'Send emails: ' . $a['send_mail'] . '<br>';
 		$content .= 'Test mode: ' . $a['test'] . '<br><br>';
 	
+	
+	// xxxx 
 		$get_posts = $this->get_upcoming_events($date_from, $date_to, $a['num_events']);
+		$bimble_posts = $this->get_upcoming_events_by_cat($date_from, $date_to, 'bimble', $a['num_events']);
+		$mingle_posts = $this->get_upcoming_events_by_cat($date_from, $date_to, 'mingle', $a['num_events']);
+		$social_posts = $this->get_upcoming_events_by_cat($date_from, $date_to, 'social', $a['num_events']);
 		
 		/*$get_posts = tribe_get_events(array('eventDisplay'		=> 'all',
 				'start_date' 		=> $date_from,
@@ -1156,7 +1199,7 @@ class Bimbler_Reminders {
 	
 		$content .= '<h5>Events to Consider</h5>';
 	
-		foreach($get_posts as $post) {
+/*		foreach($get_posts as $post) {
 				
 			error_log('Sending reminder emails for event \'' .  $post->post_title . '\' on ' . tribe_get_start_date($post->ID, true, 'Y-m-d'));
 				
@@ -1165,9 +1208,21 @@ class Bimbler_Reminders {
 			$content .= '; Title: \'' . $post->post_title . '\'';
 			$content .= '; URL: \'' . get_permalink ($post->ID) . '\'';
 			$content .= '<br>';
-		}
+		} */
+
+		error_log('Sending reminder emails for:');
+		error_log('    Bimbles: ' . count ($bimble_posts));
+		error_log('    Mingles: ' . count ($mingle_posts));
+		error_log('    Social : ' . count ($social_posts));
+
+		$content .= 'Sending reminder emails for: <br>';
+		$content .= '    Bimbles: ' . count ($bimble_posts) . '<br>';
+		$content .= '    Mingles: ' . count ($mingle_posts) . '<br>';
+		$content .= '    Social : ' . count ($social_posts) . '<br><br>';
+
 		
-		if (0 < count ($get_posts))
+//		if (0 < count ($get_posts))
+		if (0 < (count ($bimble_posts) + count ($mingle_posts) + count ($social_posts)))
 		{
 			//setup_postdata($post);
 			$notify_users = array ();
@@ -1197,7 +1252,10 @@ class Bimbler_Reminders {
 					error_log ('Notifying user '. $notify_user .' ('. $user_object->first_name .' ' . $user_object->last_name .') at '. $user_object->user_email);
 						
 					$email_content = $this->build_upcoming_notification_email (
-							$get_posts,
+							//$get_posts, // xxxx
+							$bimble_posts,
+							$mingle_posts,
+							$social_posts,
 							$user_object->first_name);
 	
 					if (!isset ($email_content)) {
