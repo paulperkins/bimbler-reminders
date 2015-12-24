@@ -1107,10 +1107,25 @@ class Bimbler_Reminders {
 				//'end_date' 			=> $date_to,
 				'posts_per_page' 	=> $count) ); */
 		
+		error_log ('Running get_upcoming_events_by_cat: ' . $category);
+		
 		$get_posts = tribe_get_events(array(
 			'start_date' 		=> $date_from,
 			'posts_per_page' 	=> $count,
 			'eventDisplay' 		=> 'all',
+			'meta_query'		=> array (
+/*										'relation'	=> 'OR', */
+										array (
+											'key' 		=> '_EventHideFromUpcoming',
+											'value'	 	=> 'anything', //<--- not required but necessary in this case
+											'compare' 	=> 'NOT EXISTS',
+										), 
+/*										array (
+											'key' 		=> '_EventHideFromUpcoming',
+											'value'	 	=> 'no',
+											'compare' 	=> '=',
+										) */
+									),
 			'tax_query' 		=> array(
 										array(
 											'taxonomy' => TribeEvents::TAXONOMY,
@@ -1199,7 +1214,7 @@ class Bimbler_Reminders {
 	
 		$content .= '<h5>Events to Consider</h5>';
 	
-/*		foreach($get_posts as $post) {
+		foreach($bimble_posts as $post) {
 				
 			error_log('Sending reminder emails for event \'' .  $post->post_title . '\' on ' . tribe_get_start_date($post->ID, true, 'Y-m-d'));
 				
@@ -1208,7 +1223,7 @@ class Bimbler_Reminders {
 			$content .= '; Title: \'' . $post->post_title . '\'';
 			$content .= '; URL: \'' . get_permalink ($post->ID) . '\'';
 			$content .= '<br>';
-		} */
+		} 
 
 		error_log('Sending reminder emails for:');
 		error_log('    Bimbles: ' . count ($bimble_posts));
