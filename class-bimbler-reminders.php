@@ -866,6 +866,11 @@ class Bimbler_Reminders {
 								'compare' 	=> '<',
 								'type' 		=> 'date'
 						),
+						array (
+							'key' 		=> '_EventHideFromUpcoming',
+							'value'	 	=> 'anything', //<--- not required but necessary in this case
+							'compare' 	=> 'NOT EXISTS',
+						), 
 						'orderby' 	=> '_EventEndDate',
 						'order'	 	=> 'ASC'
 				)));
